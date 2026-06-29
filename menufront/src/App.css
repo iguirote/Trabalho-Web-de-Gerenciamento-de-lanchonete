@@ -1,0 +1,146 @@
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.grade-cartoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
+}
+
+.btn-novo {
+    background: #2d6a4f;
+    color: #fff;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.btn-novo:hover {
+    opacity: 0.85;
+}
+
+.btn-cancelar {
+    background: transparent;
+    color: #555;
+    border: 1px solid #ddd;
+    padding: 9px 18px;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.btn-cancelar:hover {
+    opacity: 0.75;
+}
+
+/* Overlay e modal */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.modal {
+    background: #fff;
+    border-radius: 10px;
+    padding: 32px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.modal h2 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #111;
+}
+
+/* Campos do formulário */
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 14px;
+}
+
+.campo label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #555;
+    text-transform: capitalize;
+}
+
+.campo input[type="text"],
+.campo input[type="number"],
+.campo input:not([type="checkbox"]) {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.campo input:focus {
+    border-color: #2d6a4f;
+}
+
+.campo--check {
+    flex-direction: row;
+}
+
+.campo--check label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    text-transform: none;
+    font-size: 0.9rem;
+}
+
+.modal__acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Detalhe */
+.detalhe__img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.detalhe__info p {
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+/* Mensagens */
+.mensagem {
+    text-align: center;
+    color: #666;
+    margin: 40px 0;
+}
+
+.mensagem--erro {
+    color: #dc2626;
+}
