@@ -41,6 +41,12 @@ public class PedidoController {
         return pedidoService.listar();
     }
 
+    /* Histórico geral: todos os pedidos já pagos, de qualquer comanda — usado na aba Histórico do admin */
+    @GetMapping("/historico")
+    public List<PedidoDTOResponse> listarHistorico() {
+        return pedidoService.listarHistorico();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PedidoDTOResponse> buscarPorId(@PathVariable Long id) {
         try {

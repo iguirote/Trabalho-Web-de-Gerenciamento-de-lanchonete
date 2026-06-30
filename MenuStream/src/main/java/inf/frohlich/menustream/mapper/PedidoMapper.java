@@ -28,7 +28,8 @@ public class PedidoMapper {
                 itensDTO,
                 pedido.getValorTotal(),
                 pedido.getDataPedido(),
-                pedido.isVisualizado()
+                pedido.isVisualizado(),
+                pedido.isPago()
         );
     }
 

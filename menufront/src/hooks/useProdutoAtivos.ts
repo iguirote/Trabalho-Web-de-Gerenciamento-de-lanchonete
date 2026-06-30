@@ -13,16 +13,24 @@ export function useProdutoAtivos() {
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
 
-    useEffect(() => {
+    function buscarAtivos() {
+        setCarregando(true);
         fetch(`${API_URL}/ativos`)
             .then((res) => {
                 if (!res.ok) throw new Error("Erro ao buscar produtos.");
                 return res.json();
             })
-            .then((data) => setProdutos(data))
+            .then((data) => {
+                setProdutos(data);
+                setErro(null);
+            })
             .catch((e) => setErro(e.message))
             .finally(() => setCarregando(false));
+    }
+
+    useEffect(() => {
+        buscarAtivos();
     }, []);
 
-    return { produtos, carregando, erro };
+    return { produtos, carregando, erro, recarregar: buscarAtivos };
 }

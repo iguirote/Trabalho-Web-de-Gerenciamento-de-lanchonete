@@ -17,4 +17,5 @@ export interface PedidoDados {
     valorTotal: number;
     dataPedido: string; // vem como string ISO (LocalDateTime serializado), converter com new Date() ao usar
     visualizado: boolean;
+    pago: boolean; // indica se o pedido já foi pago (comanda fechada) — diferencia histórico de pedido em aberto
 }

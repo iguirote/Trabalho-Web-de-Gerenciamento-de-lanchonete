@@ -34,6 +34,11 @@ public class Pedido {
     @Column(nullable = false)
     private boolean visualizado = false;
 
+    // Marca se este pedido já foi pago (comanda fechada). Pedidos pagos não são mais
+    // apagados do banco — passam a alimentar o histórico geral (ver ComandaService.fecharComanda).
+    @Column(nullable = false)
+    private boolean pago = false;
+
     public Pedido() {}
 
     public Pedido(Comanda comanda, List<ItemPedido> itensPedido, BigDecimal valorTotal,
@@ -56,4 +61,6 @@ public class Pedido {
     public void setDataPedido(LocalDateTime dataPedido) { this.dataPedido = dataPedido; }
     public boolean isVisualizado() { return visualizado; }
     public void setVisualizado(boolean visualizado) { this.visualizado = visualizado; }
+    public boolean isPago() { return pago; }
+    public void setPago(boolean pago) { this.pago = pago; }
 }

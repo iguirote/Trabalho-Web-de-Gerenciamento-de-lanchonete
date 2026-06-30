@@ -1,4 +1,4 @@
-import { Package, Trash2 } from "lucide-react";
+import { Package, Trash2, RotateCcw } from "lucide-react";
 import type { Produto } from "../../types";
 import { CATEGORIAS, estiloCategoria, formatarPreco } from "../../utils";
 
@@ -7,6 +7,7 @@ interface FormularioProdutoState {
     preco: string;
     descricao: string;
     categoria: string;
+    imagem: string;
 }
 
 interface AdminProdutosTabProps {
@@ -18,6 +19,7 @@ interface AdminProdutosTabProps {
     onEditar: (produto: Produto) => void;
     onCancelarEdicao: () => void;
     onExcluir: (produtoId: string) => void;
+    onReativar: (produtoId: string) => void;
 }
 
 /*
@@ -47,6 +49,7 @@ export default function AdminProdutoTab({
                                             onEditar,
                                             onCancelarEdicao,
                                             onExcluir,
+                                            onReativar,
                                         }: AdminProdutosTabProps) {
     return (
         <div>
@@ -98,7 +101,20 @@ export default function AdminProdutoTab({
                                 </select>
                             </div>
                             <div>
-                                <label className="text-xs font-bold text-foreground block mb-1.5 uppercase tracking-wide">Descrição</label>
+                                <label className="text-xs font-bold text-foreground block mb-1.5 uppercase tracking-wide">
+                                    URL da imagem
+                                </label>
+
+                                <input
+                                    type="text"
+                                    placeholder="https://..."
+                                    value={formulario.imagem}
+                                    onChange={(e) => onChangeFormulario("imagem", e.target.value)}
+                                    className="w-full px-3.5 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs font-bold text-foreground block mb-1.5 uppercase tracking-wide">Descrição *</label>
                                 <textarea
                                     placeholder="Ingredientes ou detalhes do produto..."
                                     value={formulario.descricao}
@@ -118,7 +134,7 @@ export default function AdminProdutoTab({
                                 )}
                                 <button
                                     onClick={onSalvar}
-                                    disabled={!formulario.nome || !formulario.preco}
+                                    disabled={!formulario.nome || !formulario.preco || !formulario.descricao.trim()}
                                     className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     {idEmEdicao ? "Salvar Alterações" : "Adicionar Produto"}
@@ -141,8 +157,25 @@ export default function AdminProdutoTab({
                 </span>
                                 <div className="space-y-2">
                                     {produtosDaCategoria.map((produto) => (
-                                        <div key={produto.id} className="bg-card rounded-xl border border-border px-4 py-3.5 flex items-center gap-4 hover:border-primary/30 transition-colors group">
+                                        <div
+                                            key={produto.id}
+                                            className={`bg-card rounded-xl border border-border px-4 py-3.5 flex items-center gap-4 hover:border-primary/30 transition-colors group ${
+                                                produto.disponibilidade ? "" : "opacity-50"
+                                            }`}
+                                        >
                                             <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <img
+                                                        src={produto.imagem}
+                                                        alt={produto.nome}
+                                                        className="w-16 h-16 rounded-lg object-cover shrink-0"
+                                                    />
+                                                    {!produto.disponibilidade && (
+                                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-100 text-red-600 tracking-widest uppercase">
+                                                            Inativo
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <p className="font-semibold text-foreground text-sm truncate">{produto.nome}</p>
                                                 <p className="text-xs text-muted-foreground truncate mt-0.5">{produto.descricao}</p>
                                             </div>
@@ -154,12 +187,23 @@ export default function AdminProdutoTab({
                                                 >
                                                     Editar
                                                 </button>
-                                                <button
-                                                    onClick={() => onExcluir(produto.id)}
-                                                    className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors"
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </button>
+                                                {produto.disponibilidade ? (
+                                                    <button
+                                                        onClick={() => onExcluir(produto.id)}
+                                                        className="p-1.5 rounded-lg hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors"
+                                                        title="Desativar produto"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => onReativar(produto.id)}
+                                                        className="p-1.5 rounded-lg hover:bg-emerald-50 text-muted-foreground hover:text-emerald-600 transition-colors"
+                                                        title="Reativar produto"
+                                                    >
+                                                        <RotateCcw className="w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

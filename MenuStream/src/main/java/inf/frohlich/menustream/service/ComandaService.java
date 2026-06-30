@@ -8,6 +8,7 @@ import inf.frohlich.menustream.model.Comanda;
 import inf.frohlich.menustream.model.Pedido;
 import inf.frohlich.menustream.model.StatusComanda;
 import inf.frohlich.menustream.repository.ComandaRepository;
+import inf.frohlich.menustream.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,9 +19,11 @@ import java.util.Map;
 public class ComandaService {
 
     private final ComandaRepository comandaRepository;
+    private final PedidoRepository pedidoRepository;
 
-    public ComandaService(ComandaRepository comandaRepository) {
+    public ComandaService(ComandaRepository comandaRepository, PedidoRepository pedidoRepository) {
         this.comandaRepository = comandaRepository;
+        this.pedidoRepository = pedidoRepository;
     }
 
     /* Cliente digita o número (1-100) para entrar na comanda */
@@ -47,15 +50,19 @@ public class ComandaService {
         return ComandaMapper.toResponse(salva);
     }
 
-    /* Retorna todos os pedidos da comanda e depois libera ela — usado para gerar extrato/NFe antes de limpar */
+    /* Retorna todos os pedidos da comanda e depois libera ela — usado para gerar extrato/NFe antes de liberar */
     public Map<String, Object> fecharComanda(Integer numero) {
         validarNumero(numero);
 
         Comanda comanda = comandaRepository.findByNumero(numero)
                 .orElseThrow(() -> new IllegalArgumentException("Comanda não encontrada."));
 
-        /* Busca todos os pedidos — será usado para gerar extrato/NFe */
-        List<Pedido> pedidos = comanda.getPedidos();
+        /* Pedidos da rodada atual — só os que ainda não foram pagos. Comandas
+         * reaproveitadas podem ter pedidos antigos (de clientes anteriores) já
+         * marcados como pago = true, esses não entram no fechamento de novo. */
+        List<Pedido> pedidos = comanda.getPedidos().stream()
+                .filter(p -> !p.isPago())
+                .toList();
 
         /* Calcula total geral */
         BigDecimal totalGeral = pedidos.stream()
@@ -65,8 +72,12 @@ public class ComandaService {
         /* Mapeia os pedidos para response (com todos os dados) */
         List<PedidoDTOResponse> pedidosDTO = PedidoMapper.toResponseList(pedidos);
 
-        /* Limpa os pedidos da comanda — orphanRemoval deleta do BD */
-        comanda.getPedidos().clear();
+        /* Marca os pedidos da rodada como pagos — não deleta mais nada do banco,
+         * eles continuam existindo para alimentar o histórico geral. */
+        for (Pedido pedido : pedidos) {
+            pedido.setPago(true);
+        }
+        pedidoRepository.saveAll(pedidos);
 
         /* Marca como LIVRE para próximo cliente */
         comanda.setStatus(StatusComanda.LIVRE);

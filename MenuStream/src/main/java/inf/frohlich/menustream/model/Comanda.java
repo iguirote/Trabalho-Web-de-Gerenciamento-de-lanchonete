@@ -21,7 +21,11 @@ public class Comanda {
     private StatusComanda status;
 
     // Uma comanda pode ter vários pedidos ao longo do atendimento (1 pedido por "rodada" de itens).
-    @OneToMany(mappedBy = "comanda", cascade = CascadeType.ALL, orphanRemoval = true)
+    // orphanRemoval removido de propósito: ao fechar a comanda os pedidos não são mais
+    // apagados, só marcados como pago = true (ver ComandaService.fecharComanda). Se
+    // mantivéssemos orphanRemoval, qualquer comanda.getPedidos().clear() voltaria a
+    // deletar os pedidos do banco e destruiria o histórico.
+    @OneToMany(mappedBy = "comanda", cascade = CascadeType.ALL)
     private List<Pedido> pedidos = new ArrayList<>();
 
     public Comanda() {}

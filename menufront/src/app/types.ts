@@ -15,6 +15,8 @@ export interface Produto {
     preco: number;
     descricao: string;
     categoria: string;
+    imagem: string;
+    disponibilidade: boolean;
 }
 
 export interface ItemCarrinho {

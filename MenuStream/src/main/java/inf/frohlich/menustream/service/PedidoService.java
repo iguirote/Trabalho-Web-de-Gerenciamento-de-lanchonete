@@ -102,21 +102,16 @@ public class PedidoService {
                 .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
     }
 
-    /* Histórico completo de pedidos de uma comanda, em ordem cronológica (para o atendente) */
-    /*
-     * No PedidoService.salvar(), o código já percorre essa lista
-     * (for (var itemDTO : dto.itensPedido())) e cria um ItemPedido para
-     * cada um, todos vinculados ao mesmo Pedido. Ou seja, pastel e água
-     * viram dois registros de ItemPedido, mas dentro de um único Pedido —
-     * exatamente como uma "rodada" de itens que você pediu de uma vez.
-     *
-     * No front, o carrinho seria um estado local (useState<ItemCarrinho[]>)
-     * que vai acumulando os produtos que o cliente clica em "adicionar",
-     * e só quando ele confirma o pedido é que dispara esse POST de uma vez
-     * com tudo que tiver no carrinho.
-     */
+    /* Histórico de pedidos EM ABERTO de uma comanda, em ordem cronológica (extrato pro atendente).
+     * Filtra pago = false: numa comanda reaproveitada, os pedidos da rodada anterior já
+     * pagos não devem aparecer aqui de novo. */
     public List<PedidoDTOResponse> listarPorComanda(Long comandaId) {
-        return PedidoMapper.toResponseList(pedidoRepository.findByComandaIdOrderByDataPedidoAsc(comandaId));
+        return PedidoMapper.toResponseList(pedidoRepository.findByComandaIdAndPagoFalseOrderByDataPedidoAsc(comandaId));
+    }
+
+    /* Histórico geral do sistema: todos os pedidos já pagos, do mais recente pro mais antigo */
+    public List<PedidoDTOResponse> listarHistorico() {
+        return PedidoMapper.toResponseList(pedidoRepository.findByPagoTrueOrderByDataPedidoDesc());
     }
 
     /* Apenas os pedidos ainda não vistos de uma comanda específica */
