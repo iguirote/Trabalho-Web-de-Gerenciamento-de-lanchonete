@@ -8,7 +8,7 @@ public class Produto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id; // Corrigido: Long (wrapper) em vez de long primitivo
 
     @Column(nullable = false, length = 100)
     private String nome;
@@ -23,14 +23,14 @@ public class Produto {
     private String categoria;
 
     @Column(nullable = false)
-    private boolean disponibilidade;
+    private Boolean disponibilidade;
 
     @Column(length = 500)
     private String imagem;
 
     public Produto() {}
 
-    public Produto(String nome, String descricao, BigDecimal preco, String categoria, boolean disponibilidade, String imagem) {
+    public Produto(String nome, String descricao, BigDecimal preco, String categoria, Boolean disponibilidade, String imagem) {
         this.nome = nome;
         this.descricao = descricao;
         this.preco = preco;
@@ -39,7 +39,7 @@ public class Produto {
         this.imagem = imagem;
     }
 
-    public Produto(long id, String nome, String descricao, BigDecimal preco, String categoria, boolean disponibilidade, String imagem) {
+    public Produto(Long id, String nome, String descricao, BigDecimal preco, String categoria, Boolean disponibilidade, String imagem) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -49,8 +49,8 @@ public class Produto {
         this.imagem = imagem;
     }
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public String getDescricao() { return descricao; }
@@ -59,8 +59,8 @@ public class Produto {
     public void setPreco(BigDecimal preco) { this.preco = preco; }
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
-    public boolean isDisponibilidade() { return disponibilidade; }
-    public void setDisponibilidade(boolean disponibilidade) { this.disponibilidade = disponibilidade; }
+    public Boolean isDisponibilidade() { return disponibilidade; }
+    public void setDisponibilidade(Boolean disponibilidade) { this.disponibilidade = disponibilidade; }
     public String getImagem() { return imagem; }
     public void setImagem(String imagem) { this.imagem = imagem; }
 }

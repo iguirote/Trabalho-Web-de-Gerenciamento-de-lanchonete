@@ -1,12 +1,16 @@
 package inf.frohlich.menustream.dto;
 
-import inf.frohlich.menustream.repository.StatusPedido;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record PedidoDTOResponse(Long id, ClienteDTOResponse cliente,
-                                List<ItemPedidoDTOResponse> itensPedido,
-                                BigDecimal valorTotal, StatusPedido status,
-                                LocalDateTime dataPedido, LocalDateTime dataEntrega) {
-}
+// Alterado: ClienteDTOResponse -> ComandaDTOResponse. Removidos status e dataEntrega.
+// Adicionado: visualizado (indica se é "novidade" para o atendente).
+public record PedidoDTOResponse(
+        Long id,
+        ComandaDTOResponse comanda,
+        List<ItemPedidoDTOResponse> itensPedido,
+        BigDecimal valorTotal,
+        LocalDateTime dataPedido,
+        boolean visualizado
+) {}

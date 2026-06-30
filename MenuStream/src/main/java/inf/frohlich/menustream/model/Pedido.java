@@ -1,6 +1,5 @@
 package inf.frohlich.menustream.model;
 
-import inf.frohlich.menustream.repository.StatusPedido;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,52 +11,49 @@ public class Pedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
+    // Cada pedido pertence a uma Comanda. Representa uma "rodada" de itens
     @ManyToOne
-    @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
+    @JoinColumn(name = "comanda_id", nullable = false)
+    private Comanda comanda;
 
-    // cascade + orphanRemoval garantem que os itens sejam salvos e removidos junto com o pedido.
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemPedido> itensPedido = new ArrayList<>();
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valorTotal;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private StatusPedido status;
+    // Removido: StatusPedido. Não há necessidade de controlar preparo/entrega
+    // neste modelo — o pedido existe e foi enviado, é só isso que importa.
 
     @Column(nullable = false)
     private LocalDateTime dataPedido;
 
-    private LocalDateTime dataEntrega;
+    // Marca se o atendente já visualizou este pedido (usado para indicar "novidade" na tela).
+    @Column(nullable = false)
+    private boolean visualizado = false;
 
     public Pedido() {}
 
-    public Pedido(Cliente cliente, List<ItemPedido> itensPedido, BigDecimal valorTotal,
-                  StatusPedido status, LocalDateTime dataPedido, LocalDateTime dataEntrega) {
-        this.cliente = cliente;
+    public Pedido(Comanda comanda, List<ItemPedido> itensPedido, BigDecimal valorTotal,
+                  LocalDateTime dataPedido) {
+        this.comanda = comanda;
         this.itensPedido = itensPedido;
         this.valorTotal = valorTotal;
-        this.status = status;
         this.dataPedido = dataPedido;
-        this.dataEntrega = dataEntrega;
     }
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
-    public Cliente getCliente() { return cliente; }
-    public void setCliente(Cliente cliente) { this.cliente = cliente; }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Comanda getComanda() { return comanda; }
+    public void setComanda(Comanda comanda) { this.comanda = comanda; }
     public List<ItemPedido> getItensPedido() { return itensPedido; }
     public void setItensPedido(List<ItemPedido> itensPedido) { this.itensPedido = itensPedido; }
     public BigDecimal getValorTotal() { return valorTotal; }
     public void setValorTotal(BigDecimal valorTotal) { this.valorTotal = valorTotal; }
-    public StatusPedido getStatus() { return status; }
-    public void setStatus(StatusPedido status) { this.status = status; }
     public LocalDateTime getDataPedido() { return dataPedido; }
     public void setDataPedido(LocalDateTime dataPedido) { this.dataPedido = dataPedido; }
-    public LocalDateTime getDataEntrega() { return dataEntrega; }
-    public void setDataEntrega(LocalDateTime dataEntrega) { this.dataEntrega = dataEntrega; }
+    public boolean isVisualizado() { return visualizado; }
+    public void setVisualizado(boolean visualizado) { this.visualizado = visualizado; }
 }

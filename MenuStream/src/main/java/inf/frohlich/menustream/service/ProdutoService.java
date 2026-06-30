@@ -9,6 +9,7 @@ import inf.frohlich.menustream.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class ProdutoService {
@@ -22,8 +23,29 @@ public class ProdutoService {
     public ProdutoDTOResponse salvar(ProdutoDTORequest dto) {
         validar(dto);
         Produto produto = ProdutoMapper.toEntity(dto);
+        // Se disponibilidade não for enviada no JSON, assume ativo por padrão
+        if (produto.isDisponibilidade() == null) {
+            produto.setDisponibilidade(true);
+        }
         Produto salvo = produtoRepository.save(produto);
         return ProdutoMapper.toResponse(salvo);
+    }
+
+    // Movido do Controller para cá — o Controller não deve acessar o Repository diretamente
+    public List<ProdutoDTOResponse> listar() {
+        return ProdutoMapper.toResponseList(produtoRepository.findAll());
+    }
+
+    // Movido do Controller para cá — mesma razão acima
+    public ProdutoDTOResponse buscarPorId(Long id) {
+        return produtoRepository.findById(id)
+                .map(ProdutoMapper::toResponse)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
+    }
+
+    // Retorna apenas produtos ativos — usado na área do cliente
+    public List<ProdutoDTOResponse> listarAtivos() {
+        return ProdutoMapper.toResponseList(produtoRepository.findByDisponibilidadeTrue());
     }
 
     // Atualização parcial: só altera os campos que vierem preenchidos no DTO.

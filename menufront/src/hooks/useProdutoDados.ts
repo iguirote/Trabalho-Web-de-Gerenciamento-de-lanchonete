@@ -1,57 +1,37 @@
-import axios from "axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+/**
+ * USEPRODUTODADOS.TS - ADAPTADO PRO NOVO BACKEND
+ *
+ * O QUÊ MUDOU?
+ * - Antes: buscava /produto (tudo)
+ * - Agora: precisa buscar /produto/ativos (cliente vê só ativos)
+ *         e /produto (admin vê todos)
+ *
+ * SOLUÇÃO: Adicionei parâmetro "apenasAtivos" pra escolher qual endpoint
+ */
+
+import { useEffect, useState } from "react";
 import type { ProdutoDados } from "../interface/ProdutoDados";
 
-const API_URL = "http://localhost:8080";
+const API_URL = "http://localhost:8080/produto";
 
-const buscarDados = async (): Promise<ProdutoDados[]> => {
-    const response = await axios.get<ProdutoDados[]>(`${API_URL}/produtos`);
-    return response.data;
-};
+export function useProdutoDados(apenasAtivos: boolean = false) {
+    const [produtos, setProdutos] = useState<ProdutoDados[]>([]);
+    const [carregando, setCarregando] = useState(true);
+    const [erro, setErro] = useState<string | null>(null);
 
-const criarProduto = async (dto: ProdutoDados): Promise<ProdutoDados> => {
-    const response = await axios.post<ProdutoDados>(`${API_URL}/produtos`, dto);
-    return response.data;
-};
+    useEffect(() => {
+        /* Escolhe o endpoint certo baseado no parâmetro */
+        const endpoint = apenasAtivos ? `${API_URL}/ativos` : API_URL;
 
-const atualizarProduto = async (dto: ProdutoDados): Promise<ProdutoDados> => {
-    const response = await axios.put<ProdutoDados>(`${API_URL}/produtos`, dto);
-    return response.data;
-};
+        fetch(endpoint)
+            .then((res) => {
+                if (!res.ok) throw new Error("Erro ao buscar produtos.");
+                return res.json();
+            })
+            .then((data) => setProdutos(data))
+            .catch((e) => setErro(e.message))
+            .finally(() => setCarregando(false));
+    }, [apenasAtivos]);
 
-const desabilitarProduto = async (id: number): Promise<ProdutoDados> => {
-    const response = await axios.patch<ProdutoDados>(`${API_URL}/produtos/${id}/desabilitar`);
-    return response.data;
-};
-
-export function useProdutoDados() {
-    return useQuery({
-        queryKey: ["produto-dados"],
-        queryFn: buscarDados,
-        retry: 2,
-    });
-}
-
-export function useCriarProduto() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: criarProduto,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["produto-dados"] }),
-    });
-}
-
-export function useAtualizarProduto() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: atualizarProduto,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["produto-dados"] }),
-    });
-}
-
-export function useDesabilitarProduto() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: desabilitarProduto,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["produto-dados"] }),
-    });
+    return { produtos, carregando, erro };
 }

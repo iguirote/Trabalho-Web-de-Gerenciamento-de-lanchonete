@@ -1,6 +1,5 @@
 package inf.frohlich.menustream.mapper;
 
-import inf.frohlich.menustream.dto.ClienteDTOResponse;
 import inf.frohlich.menustream.dto.ItemPedidoDTOResponse;
 import inf.frohlich.menustream.dto.PedidoDTOResponse;
 import inf.frohlich.menustream.model.Pedido;
@@ -14,30 +13,22 @@ public class PedidoMapper {
     public static PedidoDTOResponse toResponse(Pedido pedido) {
         if (pedido == null) return null;
 
-        ClienteDTOResponse clienteDTO = pedido.getCliente() != null ?
-                new ClienteDTOResponse(
-                        pedido.getCliente().getId(),
-                        pedido.getCliente().getNome(),
-                        pedido.getCliente().getEmail(),
-                        pedido.getCliente().getEnderecoEntrega(),
-                        pedido.getCliente().getPreferenciaPagamento()
-                ) : null;
+        /* Mapeia a comanda */
+        var comandaDTO = pedido.getComanda() != null ?
+                ComandaMapper.toResponse(pedido.getComanda()) : null;
 
+        /* Mapeia cada item do pedido */
         List<ItemPedidoDTOResponse> itensDTO = pedido.getItensPedido().stream()
-                .map(item -> new ItemPedidoDTOResponse(
-                        ProdutoMapper.toResponse(item.getProduto()),
-                        item.getQuantidade()
-                ))
+                .map(ItemPedidoMapper::toResponse)
                 .toList();
 
         return new PedidoDTOResponse(
                 pedido.getId(),
-                clienteDTO,
+                comandaDTO,
                 itensDTO,
                 pedido.getValorTotal(),
-                pedido.getStatus(),
                 pedido.getDataPedido(),
-                pedido.getDataEntrega()
+                pedido.isVisualizado()
         );
     }
 
