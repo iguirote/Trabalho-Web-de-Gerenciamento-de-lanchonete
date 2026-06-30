@@ -3,11 +3,22 @@ import type { ProdutoDados } from "../interface/ProdutoDados";
 
 const API_URL = "http://localhost:8080/produto";
 
+// Espelha o UpdateProdutoDTO do back — todos os campos opcionais,
+// porque a atualização é parcial (só altera o que vier preenchido).
+export interface ProdutoEditarRequest {
+    nome?: string;
+    descricao?: string;
+    preco?: number;
+    categoria?: string;
+    disponibilidade?: boolean;
+    imagem?: string;
+}
+
 export function useProdutoEditar() {
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState<string | null>(null);
 
-    async function editarProduto(id: number, dados: Partial<ProdutoDados>): Promise<ProdutoDados | null> {
+    async function editarProduto(id: number, dados: ProdutoEditarRequest): Promise<ProdutoDados | null> {
         setCarregando(true);
         setErro(null);
         try {

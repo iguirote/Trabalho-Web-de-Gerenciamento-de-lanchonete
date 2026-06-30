@@ -1,63 +1,41 @@
-/**
- * USEPEDIDOCRIAR.TS - ADAPTADO PRO NOVO BACKEND
- *
- * O QUÊ MUDOU?
- * - Antes: enviava estrutura genérica de pedido
- * - Agora: OBRIGATÓRIO enviar:
- *   {
- *     "comandaNumero": 42,
- *     "itensPedido": [
- *       { "produtoId": 5, "quantidade": 1 },
- *       { "produtoId": 12, "quantidade": 2 }
- *     ]
- *   }
- *
- * ISSO VEM DO CARRINHO LOCAL! Você chama assim:
- * criarPedido(42, carrinho.itens.map(i => ({
- *   produtoId: i.produtoId,
- *   quantidade: i.quantidade
- * })))
- */
-
 import { useState } from "react";
 import type { PedidoDados } from "../interface/PedidoDados";
 
 const API_URL = "http://localhost:8080/pedido";
 
+// Espelha o ItemPedidoDTORequest (item dentro do PedidoDTORequest).
 export interface ItemPedidoRequest {
     produtoId: number;
     quantidade: number;
 }
 
+// Espelha o PedidoDTORequest do back.
+export interface PedidoRequest {
+    comandaNumero: number;
+    itensPedido: ItemPedidoRequest[];
+}
+
+/*
+ * POST /pedido — usado na ClienteMenuStep, no botão "Finalizar Pedido".
+ * O carrinho do cliente vira "itensPedido" aqui. Em caso de sucesso, a
+ * tela avança pra ClienteSucessoStep; o pedido criado já chega marcado
+ * como "visualizado: false", então aparece automaticamente no painel
+ * de novidades do atendente no próximo polling.
+ */
 export function usePedidoCriar() {
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState<string | null>(null);
 
-    async function criarPedido(
-        comandaNumero: number,
-        itensPedido: ItemPedidoRequest[]
-    ): Promise<PedidoDados | null> {
+    async function criarPedido(dados: PedidoRequest): Promise<PedidoDados | null> {
         setCarregando(true);
         setErro(null);
-
-        /* Validação: carrinho não pode estar vazio */
-        if (!itensPedido || itensPedido.length === 0) {
-            setErro("Carrinho vazio! Adicione itens antes de pedir.");
-            setCarregando(false);
-            return null;
-        }
-
         try {
             const res = await fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                /* IMPORTANTE: estrutura EXATA que o backend espera */
-                body: JSON.stringify({
-                    comandaNumero,
-                    itensPedido,
-                }),
+                body: JSON.stringify(dados),
             });
-            if (!res.ok) throw new Error("Erro ao criar pedido.");
+            if (!res.ok) throw new Error("Erro ao enviar pedido.");
             return await res.json();
         } catch (e: any) {
             setErro(e.message);

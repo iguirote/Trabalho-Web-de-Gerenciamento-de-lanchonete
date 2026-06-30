@@ -1,0 +1,28 @@
+import { useEffect, useState } from "react";
+import type { ProdutoDados } from "../interface/ProdutoDados";
+
+const API_URL = "http://localhost:8080/produto";
+
+/*
+ * GET /produto/ativos — usado no cardápio do cliente (ClienteMenuStep).
+ * Só traz produtos com disponibilidade = true, porque o cliente não
+ * deve ver itens que o admin desativou.
+ */
+export function useProdutoAtivos() {
+    const [produtos, setProdutos] = useState<ProdutoDados[]>([]);
+    const [carregando, setCarregando] = useState(true);
+    const [erro, setErro] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetch(`${API_URL}/ativos`)
+            .then((res) => {
+                if (!res.ok) throw new Error("Erro ao buscar produtos.");
+                return res.json();
+            })
+            .then((data) => setProdutos(data))
+            .catch((e) => setErro(e.message))
+            .finally(() => setCarregando(false));
+    }, []);
+
+    return { produtos, carregando, erro };
+}
