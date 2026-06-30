@@ -21,4 +21,10 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     // Histórico geral: todos os pedidos já pagos, do mais recente para o mais antigo
     List<Pedido> findByPagoTrueOrderByDataPedidoDesc();
+
+    // Todos os pedidos EM ABERTO do sistema (pago = false), de qualquer comanda — usado
+    // pra montar os "chips" de comandas abertas. Diferente de findByVisualizadoFalse...:
+    // um pedido pode já ter sido visto pelo atendente e ainda não ter sido pago, então
+    // a comanda continua aberta mesmo depois que tudo foi "visualizado".
+    List<Pedido> findByPagoFalseOrderByDataPedidoAsc();
 }

@@ -114,6 +114,13 @@ public class PedidoService {
         return PedidoMapper.toResponseList(pedidoRepository.findByPagoTrueOrderByDataPedidoDesc());
     }
 
+    /* Todos os pedidos em aberto (pago = false) do sistema, de qualquer comanda — usado
+     * pra montar os "chips" de comandas abertas na aba Comandas do admin. Não usa
+     * visualizado, porque um pedido pode já ter sido visto e ainda não ter sido pago. */
+    public List<PedidoDTOResponse> listarAbertos() {
+        return PedidoMapper.toResponseList(pedidoRepository.findByPagoFalseOrderByDataPedidoAsc());
+    }
+
     /* Apenas os pedidos ainda não vistos de uma comanda específica */
     public List<PedidoDTOResponse> listarNovidades(Long comandaId) {
         return PedidoMapper.toResponseList(pedidoRepository.findByComandaIdAndVisualizadoFalse(comandaId));

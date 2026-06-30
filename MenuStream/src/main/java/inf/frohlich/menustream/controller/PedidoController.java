@@ -47,6 +47,14 @@ public class PedidoController {
         return pedidoService.listarHistorico();
     }
 
+    /* Todos os pedidos em aberto (pago = false) do sistema — usado pros "chips" de
+     * comandas abertas na aba Comandas, pra não sumir uma comanda só porque os
+     * pedidos dela já foram todos visualizados. */
+    @GetMapping("/abertos")
+    public List<PedidoDTOResponse> listarAbertos() {
+        return pedidoService.listarAbertos();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PedidoDTOResponse> buscarPorId(@PathVariable Long id) {
         try {

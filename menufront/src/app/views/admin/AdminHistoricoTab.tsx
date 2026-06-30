@@ -5,6 +5,7 @@ import { formatarPreco } from "../../utils";
 interface AdminHistoricoTabProps {
     historico: EntradaHistorico[];
     onRemoverEntrada: (entradaId: string) => void;
+    onLimparHistorico: () => void;
 }
 
 /*
@@ -19,13 +20,30 @@ interface AdminHistoricoTabProps {
  * geral, filtrando os que já foram pagos — ou, dependendo de como o
  * back evoluir, de uma rota dedicada. Por enquanto a tela só recebe
  * a lista pronta via props.
+ *
+ * "Limpar histórico" (onLimparHistorico) é só local, igual o remover
+ * de um item — esconde tudo da lista na tela, não apaga nada do banco.
+ * Os pedidos pagos são registro de pagamento de verdade, então a gente
+ * não deleta isso com um clique.
  */
-export default function AdminHistoricoTab({ historico, onRemoverEntrada }: AdminHistoricoTabProps) {
+export default function AdminHistoricoTab({ historico, onRemoverEntrada, onLimparHistorico }: AdminHistoricoTabProps) {
     return (
         <div>
-            <div className="mb-6">
-                <h2 className="text-2xl font-extrabold text-foreground">Histórico de Pedidos</h2>
-                <p className="text-muted-foreground text-sm mt-0.5">Consulta de pedidos já entregues e pagos</p>
+            <div className="mb-6 flex items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-extrabold text-foreground">Histórico de Pedidos</h2>
+                    <p className="text-muted-foreground text-sm mt-0.5">Consulta de pedidos já entregues e pagos</p>
+                </div>
+                {historico.length > 0 && (
+                    <button
+                        onClick={onLimparHistorico}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+                        title="Limpar histórico da tela (não apaga os registros de pagamento)"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Limpar histórico
+                    </button>
+                )}
             </div>
 
             {historico.length === 0 ? (

@@ -21,6 +21,7 @@ import { usePedidoCriar, type ItemPedidoRequest } from "../hooks/usePedidoCriar"
 import { usePedidoHistorico } from "../hooks/usePedidoHistorico";
 import { usePedidoHistoricoGeral } from "../hooks/usePedidoHistoricoGeral";
 import { usePedidoNovidades } from "../hooks/usePedidoNovidades";
+import { usePedidoAbertos } from "../hooks/usePedidoAbertos";
 import { usePedidoVisualizar } from "../hooks/usePedidoVisualizar";
 import { useProdutoAtivos } from "../hooks/useProdutoAtivos";
 import { useProdutoCriar, type ProdutoRequest } from "../hooks/useProdutoCriar";
@@ -125,6 +126,7 @@ export default function App() {
 
     const { criarPedido, erro: erroCriarPedido } = usePedidoCriar();
     const pedidoNovidadesApi = usePedidoNovidades(); // polling a cada 5s
+    const pedidoAbertosApi = usePedidoAbertos(); // polling a cada 5s — "chips" de comandas abertas
     const pedidoHistoricoGeralApi = usePedidoHistoricoGeral(); // aba Histórico (admin)
     const { marcarComoVisualizado } = usePedidoVisualizar();
 
@@ -173,34 +175,35 @@ export default function App() {
     );
 
     /*
-     * Mapa número da comanda → id interno, montado a partir dos pedidos
-     * de novidades (cada PedidoDados já vem com a ComandaDados completa).
-     * Usado só como atalho pra evitar uma chamada de rede extra quando o
-     * atendente clica num chip que já está na tela; a busca "de verdade"
-     * (quando o número não está nesse mapa) usa o useComandaBuscar, que
-     * chama o GET /comanda/{numero}.
+     * Mapa número da comanda → id interno, montado a partir dos pedidos em
+     * aberto (cada PedidoDados já vem com a ComandaDados completa). Usado só
+     * como atalho pra evitar uma chamada de rede extra quando o atendente
+     * clica num chip que já está na tela; a busca "de verdade" (quando o
+     * número não está nesse mapa) usa o useComandaBuscar, que chama o
+     * GET /comanda/{numero}.
      */
     const numeroParaIdComanda = useMemo(() => {
         const mapa: Record<string, number> = {};
-        for (const p of pedidoNovidadesApi.pedidos) {
+        for (const p of pedidoAbertosApi.pedidos) {
             mapa[String(p.comanda.numero)] = p.comanda.id;
         }
         return mapa;
-    }, [pedidoNovidadesApi.pedidos]);
+    }, [pedidoAbertosApi.pedidos]);
 
-    // "Comandas abertas" (chips) — agrupamento dos itens ainda não vistos por
-    // comanda. É uma aproximação: mostra o que está pendente de atendimento,
-    // não o extrato completo (esse só fica disponível quando a comanda é
-    // selecionada, via usePedidoHistorico).
+    // "Comandas abertas" (chips) — todas as comandas com pelo menos um pedido
+    // ainda não pago. Importante: isso usa pago = false (pedidoAbertosApi), não
+    // visualizado = false (pedidoNovidadesApi) — senão uma comanda some da lista
+    // assim que o atendente marca o último pedido como "entregue", mesmo que ela
+    // continue ocupada e com conta em aberto.
     const comandasAbertasChips: Record<string, ItemPedido[]> = useMemo(() => {
         const agrupado: Record<string, ItemPedido[]> = {};
-        for (const p of pedidoNovidadesApi.pedidos) {
+        for (const p of pedidoAbertosApi.pedidos) {
             const numero = String(p.comanda.numero);
             const itens = p.itensPedido.map(itemPedidoDadosParaItemPedido);
             agrupado[numero] = [...(agrupado[numero] || []), ...itens];
         }
         return agrupado;
-    }, [pedidoNovidadesApi.pedidos]);
+    }, [pedidoAbertosApi.pedidos]);
 
     // Itens da comanda selecionada — vêm do histórico completo (todos os
     // pedidos daquela comanda, vistos ou não), que é o extrato de verdade.
@@ -222,7 +225,28 @@ export default function App() {
     // Por isso virou só uma ocultação local (não chama nenhuma API) — se quiser
     // trocar isso por tirar o botão da tela, é só remover o onRemoverEntrada
     // do AdminHistoricoTab logo abaixo.
-    const [historicoOcultos, setHistoricoOcultos] = useState<Set<string>>(new Set());
+    // Persistido no localStorage: sem isso, um F5 voltaria a mostrar tudo que
+    // já tinha sido "removido"/"limpo" da tela, porque era só estado em memória.
+    const CHAVE_HISTORICO_OCULTOS = "menustream:historico-ocultos";
+    const [historicoOcultos, setHistoricoOcultos] = useState<Set<string>>(() => {
+        try {
+            const salvo = localStorage.getItem(CHAVE_HISTORICO_OCULTOS);
+            return salvo ? new Set(JSON.parse(salvo)) : new Set();
+        } catch {
+            return new Set();
+        }
+    });
+    function atualizarHistoricoOcultos(atualizar: (prev: Set<string>) => Set<string>) {
+        setHistoricoOcultos((prev) => {
+            const novo = atualizar(prev);
+            try {
+                localStorage.setItem(CHAVE_HISTORICO_OCULTOS, JSON.stringify([...novo]));
+            } catch {
+                // localStorage indisponível (modo privado, quota cheia, etc.) — segue só em memória
+            }
+            return novo;
+        });
+    }
     const historico: EntradaHistorico[] = useMemo(
         () =>
             pedidoHistoricoGeralApi.pedidos
@@ -231,7 +255,19 @@ export default function App() {
         [pedidoHistoricoGeralApi.pedidos, historicoOcultos]
     );
     function removerHistorico(id: string) {
-        setHistoricoOcultos((prev) => new Set(prev).add(id));
+        atualizarHistoricoOcultos((prev) => new Set(prev).add(id));
+    }
+
+    // Limpa a lista inteira da tela de uma vez (mesmo mecanismo do removerHistorico,
+    // só que pra todos os itens visíveis no momento) — não apaga nada do banco.
+    function limparHistorico() {
+        atualizarHistoricoOcultos((prev) => {
+            const novo = new Set(prev);
+            for (const p of pedidoHistoricoGeralApi.pedidos) {
+                novo.add(String(p.id));
+            }
+            return novo;
+        });
     }
 
     /* ── Carrinho ─────────────────────────────────────────────────────── */
@@ -300,6 +336,7 @@ export default function App() {
             setComandaVisualizadaId(null);
             setComandaPesquisada("");
             pedidoNovidadesApi.recarregar();
+            pedidoAbertosApi.recarregar();
             pedidoHistoricoGeralApi.recarregar();
         } else {
             window.alert(erroFecharComanda ?? "Erro ao fechar comanda.");
@@ -526,7 +563,7 @@ export default function App() {
                     />
                 )}
                 {abaAdmin === "historico" && (
-                    <AdminHistoricoTab historico={historico} onRemoverEntrada={removerHistorico} />
+                    <AdminHistoricoTab historico={historico} onRemoverEntrada={removerHistorico} onLimparHistorico={limparHistorico} />
                 )}
             </AdminLayout>
         );
