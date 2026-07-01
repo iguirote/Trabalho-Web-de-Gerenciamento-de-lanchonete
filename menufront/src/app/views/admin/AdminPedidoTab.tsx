@@ -8,26 +8,6 @@ interface AdminPedidosTabProps {
     onMarcarComoEntregue: (pedidoId: string) => void;
 }
 
-/*
- * Extraído do App.tsx original (bloco abaAdmin === "pedidos").
- *
- * Esta é a tela que você descreveu como "painel central": o atendente
- * abre esta aba e vê, em cards, os pedidos que os clientes acabaram de
- * fazer. Clicar no card expande e mostra os itens (água, pastel, etc).
- * O botão "Pedido Entregue" remove o card da lista.
- *
- * Na etapa de integração com a API, esta tela vai funcionar assim:
- * - A lista "pedidosPendentes" vai vir de GET /pedido/novidades, chamado
- *   de novo a cada poucos segundos (o "polling" que conversamos) — assim
- *   a tela se atualiza sozinha sem o atendente precisar apertar F5.
- * - O botão "Pedido Entregue" vai chamar PATCH /pedido/{id}/visualizar,
- *   que marca o pedido como visto no banco. Na próxima vez que o
- *   polling buscar novidades, esse pedido não aparece mais.
- *
- * Por enquanto esta tela não sabe nada disso — ela só recebe a lista
- * pronta via props, então essa troca de "onde os dados vêm" não vai
- * exigir mudar nada aqui dentro.
- */
 export default function AdminPedidoTab({
                                            pedidosPendentes,
                                            onAlternarExpandido,

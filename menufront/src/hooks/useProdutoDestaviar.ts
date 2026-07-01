@@ -2,12 +2,6 @@ import { useState } from "react";
 
 const API_URL = "http://localhost:8080/produto";
 
-/*
- * DELETE /produto/{id} — atenção: isso NÃO apaga o produto do banco.
- * O back faz uma remoção lógica, só seta disponibilidade = false.
- * O produto continua existindo (necessário para manter o histórico
- * de pedidos antigos íntegro), só some do cardápio do cliente.
- */
 export function useProdutoDesativar() {
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState<string | null>(null);

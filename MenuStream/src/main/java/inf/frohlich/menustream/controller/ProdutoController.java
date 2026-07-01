@@ -12,12 +12,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/produto")
-@CrossOrigin(origins = "*") // Em produção, substituir "*" pela URL do front-end
+@CrossOrigin(origins = "*")
 public class ProdutoController {
 
     private final ProdutoService produtoService;
 
-    // Corrigido: injeção apenas do Service — Controller não deve conhecer o Repository
     public ProdutoController(ProdutoService produtoService) {
         this.produtoService = produtoService;
     }
@@ -58,7 +57,6 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoService.atualizar(dtoComId));
     }
 
-    // Remoção lógica: seta disponibilidade=false em vez de excluir o registro.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> desativar(@PathVariable Long id) {
         try {

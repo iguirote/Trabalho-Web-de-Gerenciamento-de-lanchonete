@@ -3,11 +3,7 @@ import type { ProdutoDados } from "../interface/ProdutoDados";
 
 const API_URL = "http://localhost:8080/produto";
 
-/*
- * GET /produto — usado na aba Produtos do admin (AdminProdutoTab).
- * Diferente do useProdutoAtivos, traz TODOS os produtos, incluindo
- * os desativados, porque o admin precisa poder reativá-los ou editá-los.
- */
+
 export function useProdutoDados() {
     const [produtos, setProdutos] = useState<ProdutoDados[]>([]);
     const [carregando, setCarregando] = useState(true);
@@ -32,8 +28,5 @@ export function useProdutoDados() {
         buscarProdutos();
     }, []);
 
-    // "recarregar" foi adicionado pra dar pro App.tsx um jeito de buscar a
-    // lista de novo depois de criar/editar/desativar um produto — sem isso,
-    // a tela de admin ficaria com a lista desatualizada até um F5.
     return { produtos, carregando, erro, recarregar: buscarProdutos };
 }

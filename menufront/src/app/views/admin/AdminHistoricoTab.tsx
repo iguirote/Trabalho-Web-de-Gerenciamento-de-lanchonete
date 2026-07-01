@@ -8,24 +8,6 @@ interface AdminHistoricoTabProps {
     onLimparHistorico: () => void;
 }
 
-/*
- * Extraído do App.tsx original (bloco abaAdmin === "historico").
- *
- * Lista simples de consulta — mostra cada "rodada" de pedido que já
- * foi entregue/paga, com horário, itens e total. É só pra consulta,
- * diferente da aba "Comandas" que serve pra fechar conta de algo
- * ainda em aberto.
- *
- * Na integração com a API, "historico" pode vir de um GET /pedido
- * geral, filtrando os que já foram pagos — ou, dependendo de como o
- * back evoluir, de uma rota dedicada. Por enquanto a tela só recebe
- * a lista pronta via props.
- *
- * "Limpar histórico" (onLimparHistorico) é só local, igual o remover
- * de um item — esconde tudo da lista na tela, não apaga nada do banco.
- * Os pedidos pagos são registro de pagamento de verdade, então a gente
- * não deleta isso com um clique.
- */
 export default function AdminHistoricoTab({ historico, onRemoverEntrada, onLimparHistorico }: AdminHistoricoTabProps) {
     return (
         <div>

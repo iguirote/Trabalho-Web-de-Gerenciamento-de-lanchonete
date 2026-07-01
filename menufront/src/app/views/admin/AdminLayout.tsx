@@ -10,21 +10,6 @@ interface AdminLayoutProps {
     children: React.ReactNode;
 }
 
-/*
- * Extraído do App.tsx original (a parte da <nav> dentro de tela === "admin").
- * Este componente é só a "moldura" do admin: a barra superior com as 4 abas
- * (Pedidos, Comandas, Produtos, Histórico) e o botão de sair.
- *
- * O conteúdo de cada aba (children) é passado de fora — quem decide QUAL
- * aba mostrar é o componente pai, baseado no valor de abaAtiva. Esse
- * padrão é o mesmo "lifting state up" que usamos nas telas do cliente:
- * o AdminLayout não guarda em si qual aba está selecionada, ele só recebe
- * e exibe.
- *
- * Os números nas bolinhas (badge) ao lado de "Pedidos" e "Histórico" vêm
- * de fora também — na integração com a API, "quantidadePedidosPendentes"
- * vai ser o tamanho da lista retornada por GET /pedido/novidades.
- */
 export default function AdminLayout({
                                         abaAtiva,
                                         quantidadePedidosPendentes,

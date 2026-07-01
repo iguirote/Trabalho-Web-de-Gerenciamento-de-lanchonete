@@ -8,7 +8,7 @@ public class Produto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Corrigido: Long (wrapper) em vez de long primitivo
+    private Long id;
 
     @Column(nullable = false, length = 100)
     private String nome;

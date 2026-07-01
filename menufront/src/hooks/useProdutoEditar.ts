@@ -3,8 +3,6 @@ import type { ProdutoDados } from "../interface/ProdutoDados";
 
 const API_URL = "http://localhost:8080/produto";
 
-// Espelha o UpdateProdutoDTO do back — todos os campos opcionais,
-// porque a atualização é parcial (só altera o que vier preenchido).
 export interface ProdutoEditarRequest {
     nome?: string;
     descricao?: string;

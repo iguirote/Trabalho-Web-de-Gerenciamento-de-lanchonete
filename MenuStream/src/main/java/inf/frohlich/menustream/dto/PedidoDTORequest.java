@@ -2,7 +2,6 @@ package inf.frohlich.menustream.dto;
 
 import java.util.List;
 
-// Alterado: clienteId -> comandaNumero. Removidos status e dataEntrega (não existem mais).
 public record PedidoDTORequest(
         Integer comandaNumero,
         List<ItemPedidoDTORequest> itensPedido

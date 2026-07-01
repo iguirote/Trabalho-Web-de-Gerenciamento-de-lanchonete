@@ -18,22 +18,6 @@ interface ClienteMenuStepProps {
     onVoltar: () => void;
 }
 
-/*
- * Extraído do App.tsx original (etapa "menu" do etapaCliente).
- * Esta é a tela mais movimentada do lado do cliente: mostra o cardápio,
- * deixa filtrar por categoria, e tem o carrinho (lateral no desktop,
- * em modal puxado de baixo no mobile).
- *
- * Importante: esta view não guarda o carrinho nem a lista de produtos —
- * ela só EXIBE o que vier via props e AVISA o componente pai quando o
- * cliente clica em algo (adicionar, remover, finalizar). Isso é
- * proposital: na etapa de integração, o carrinho continua sendo um
- * estado local (useState) no componente pai, mas a lista de produtos
- * vai passar a vir de GET /produto/ativos, e o "Finalizar Pedido" vai
- * disparar um POST /pedido com tudo que estiver no carrinho. Como essa
- * view não sabe de onde os dados vêm, nenhuma dessas trocas vai exigir
- * mudar este arquivo.
- */
 export default function ClienteMenuStep({
                                             numeroComanda,
                                             produtos,

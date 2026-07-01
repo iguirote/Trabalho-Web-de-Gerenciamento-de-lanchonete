@@ -11,7 +11,6 @@ public class ItemPedidoMapper {
     public static ItemPedidoDTOResponse toResponse(ItemPedido itemPedido) {
         if (itemPedido == null) return null;
 
-        /* Calcula o subtotal do item: preço * quantidade */
         BigDecimal subtotal = itemPedido.getProduto().getPreco()
                 .multiply(BigDecimal.valueOf(itemPedido.getQuantidade()));
 

@@ -19,13 +19,11 @@ public class ComandaController {
         this.comandaService = comandaService;
     }
 
-    /* Cliente digita o número da comanda para entrar — marca como OCUPADA */
     @PostMapping("/entrar")
     public ResponseEntity<ComandaDTOResponse> entrar(@RequestBody EntradaComandaDTO dto) {
         return ResponseEntity.ok(comandaService.entrar(dto.numero()));
     }
 
-    /* Usado ao fechar a conta — libera a comanda e retorna extrato para impressão */
     @PostMapping("/{numero}/fechar")
     public ResponseEntity<?> fechar(@PathVariable Integer numero) {
         try {
@@ -36,7 +34,6 @@ public class ComandaController {
         }
     }
 
-    /* Usado quando a comanda é liberada (sem fechar conta, só muda status) */
     @PostMapping("/{numero}/liberar")
     public ResponseEntity<ComandaDTOResponse> liberar(@PathVariable Integer numero) {
         return ResponseEntity.ok(comandaService.liberar(numero));

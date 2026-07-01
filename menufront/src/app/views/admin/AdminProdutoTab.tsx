@@ -22,24 +22,6 @@ interface AdminProdutosTabProps {
     onReativar: (produtoId: string) => void;
 }
 
-/*
- * Extraído do App.tsx original (bloco abaAdmin === "produtos").
- *
- * Tela de cadastro de produtos: formulário fixo do lado esquerdo
- * (sticky, sempre visível ao rolar) e a lista de produtos agrupada
- * por categoria do lado direito.
- *
- * Na etapa de integração:
- * - A lista "produtos" vai vir de GET /produto (lista completa, ativos
- *   e inativos — diferente do cardápio do cliente, que usa só /ativos).
- * - "onSalvar" vai chamar POST /produto (criar) ou PUT /produto/{id}
- *   (editar), dependendo se "idEmEdicao" está preenchido ou não.
- * - "onExcluir" na verdade vai chamar DELETE /produto/{id} — mas vale
- *   lembrar que esse endpoint não apaga o produto do banco, ele só
- *   marca disponibilidade = false (é uma "exclusão lógica"). Isso é
- *   importante porque produtos desativados ainda aparecem em pedidos
- *   antigos do histórico, só não aparecem mais no cardápio do cliente.
- */
 export default function AdminProdutoTab({
                                             produtos,
                                             formulario,

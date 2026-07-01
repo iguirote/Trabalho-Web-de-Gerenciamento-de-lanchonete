@@ -4,9 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// Alterado: ClienteDTOResponse -> ComandaDTOResponse. Removidos status e dataEntrega.
-// Adicionado: visualizado (indica se é "novidade" para o atendente) e pago
-// (indica se o pedido já foi pago/fechado — diferencia histórico de pedido em aberto).
 public record PedidoDTOResponse(
         Long id,
         ComandaDTOResponse comanda,

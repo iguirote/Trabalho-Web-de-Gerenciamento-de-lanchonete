@@ -14,25 +14,6 @@ interface AdminComandasTabProps {
     onFinalizarPagamento: (numero: string) => void;
 }
 
-/*
- * Extraído do App.tsx original (bloco abaAdmin === "comandas").
- *
- * Aqui o atendente digita o número de uma comanda (ou clica num dos
- * "chips" das comandas já abertas) e vê o extrato dela: todos os itens
- * pedidos até agora, somados, com botão de Imprimir e Finalizar Pagamento.
- *
- * Esta é a tela que vai usar o endpoint POST /comanda/{numero}/fechar
- * que você criou no back. Esse endpoint já devolve os pedidos agrupados
- * e o total geral — ou seja, o "extrato consolidado" que conversamos
- * antes (sem mostrar "Pedido 1, Pedido 2" separados, só a soma de tudo
- * que a comanda consumiu). Ao clicar em "Finalizar Pagamento", a chamada
- * a esse endpoint já limpa os pedidos da comanda e libera ela para o
- * próximo cliente, tudo em uma única requisição.
- *
- * Por enquanto esta tela ainda trabalha com o formato antigo (objeto
- * comandasAbertas guardado em memória) — isso muda só na etapa de
- * integração, sem precisar tocar no visual.
- */
 export default function AdminComandaTab({
                                             comandasAbertas,
                                             comandaPesquisada,

@@ -31,24 +31,20 @@ public class ProdutoService {
         return ProdutoMapper.toResponse(salvo);
     }
 
-    // Movido do Controller para cá — o Controller não deve acessar o Repository diretamente
     public List<ProdutoDTOResponse> listar() {
         return ProdutoMapper.toResponseList(produtoRepository.findAll());
     }
 
-    // Movido do Controller para cá — mesma razão acima
     public ProdutoDTOResponse buscarPorId(Long id) {
         return produtoRepository.findById(id)
                 .map(ProdutoMapper::toResponse)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));
     }
 
-    // Retorna apenas produtos ativos — usado na área do cliente
     public List<ProdutoDTOResponse> listarAtivos() {
         return ProdutoMapper.toResponseList(produtoRepository.findByDisponibilidadeTrue());
     }
 
-    // Atualização parcial: só altera os campos que vierem preenchidos no DTO.
     public ProdutoDTOResponse atualizar(UpdateProdutoDTO dto) {
         if (dto == null || dto.id() == null) {
             throw new IllegalArgumentException("ID do produto é obrigatório.");
@@ -68,7 +64,6 @@ public class ProdutoService {
         return ProdutoMapper.toResponse(atualizado);
     }
 
-    // Remoção lógica: desativa o produto em vez de excluí-lo do banco.
     public void desativar(Long id) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado."));

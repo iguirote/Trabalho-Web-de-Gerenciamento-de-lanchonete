@@ -40,29 +40,6 @@ import AdminProdutoTab from "./views/admin/AdminProdutoTab";
 import AdminHistoricoTab from "./views/admin/AdminHistoricoTab";
 
 
-/*
- * App.tsx — ponto central da aplicação, agora integrado com a API.
- *
- * Continua com o mesmo trabalho de antes: GUARDAR o estado e DECIDIR
- * qual tela mostrar. As views não mudaram nada — elas continuam
- * recebendo exatamente os mesmos tipos "fake" (Produto, ItemPedido,
- * PedidoPendente, EntradaHistorico, com id: string) que já recebiam.
- *
- * O que mudou é DE ONDE os dados vêm: em vez de useState fixo, agora
- * cada pedaço vem de um hook que conversa com o back. Como os tipos do
- * back usam id: number (ProdutoDados, PedidoDados, ComandaDados), este
- * arquivo faz a "tradução" entre os dois mundos (funções *ParaProduto,
- * *ParaItemPedido, *ParaPedidoPendente logo abaixo), assim as views não
- * precisam saber que isso mudou.
- *
- * Uma coisa que ficava incompleta nessa tradução já foi resolvida: a aba
- * "Histórico" do admin agora usa o endpoint de histórico geral
- * (GET /pedido/historico, via usePedidoHistoricoGeral), que só existe
- * depois da mudança de modelagem no back (pedidos passam a ser marcados
- * como pago = true em vez de apagados ao fechar a comanda).
- */
-
-/* ── Tradutores: DTO do back (id: number) → tipo "fake" da view (id: string) ── */
 
 function produtoDadosParaProduto(p: ProdutoDados): Produto {
     return {
@@ -95,8 +72,6 @@ function pedidoDadosParaPedidoPendente(p: PedidoDados, expandido: boolean): Pedi
     };
 }
 
-// Mesma forma de PedidoPendente (id, numeroComanda, timestamp, itens), só que
-// sem "expandido" e com "total" (campo de EntradaHistorico em ./types).
 function pedidoDadosParaEntradaHistorico(p: PedidoDados): EntradaHistorico {
     return {
         id: String(p.id),
@@ -108,14 +83,12 @@ function pedidoDadosParaEntradaHistorico(p: PedidoDados): EntradaHistorico {
 }
 
 export default function App() {
-    // ───────────────────────── Navegação ─────────────────────────
     const [tela, setTela] = useState<View>("login");
     const [abaAdmin, setAbaAdmin] = useState<AdminTab>("pedidos");
     const [etapaCliente, setEtapaCliente] = useState<ClienteStep>("entrada");
 
-    // ───────────────────────── Hooks de API ─────────────────────────
-    const produtoAtivosApi = useProdutoAtivos();   // cardápio do cliente
-    const produtoDadosApi = useProdutoDados();     // lista completa (admin)
+    const produtoAtivosApi = useProdutoAtivos();
+    const produtoDadosApi = useProdutoDados();
     const { criarProduto, erro: erroCriarProduto } = useProdutoCriar();
     const { editarProduto: editarProdutoApi, erro: erroEditarProduto } = useProdutoEditar();
     const { desativarProduto, erro: erroDesativarProduto } = useProdutoDesativar();
@@ -127,22 +100,19 @@ export default function App() {
     const { criarPedido, erro: erroCriarPedido } = usePedidoCriar();
     const pedidoNovidadesApi = usePedidoNovidades(); // polling a cada 5s
     const pedidoAbertosApi = usePedidoAbertos(); // polling a cada 5s — "chips" de comandas abertas
-    const pedidoHistoricoGeralApi = usePedidoHistoricoGeral(); // aba Histórico (admin)
+    const pedidoHistoricoGeralApi = usePedidoHistoricoGeral();
     const { marcarComoVisualizado } = usePedidoVisualizar();
 
-    // ───────────────────────── Estado do cliente ─────────────────────────
-    const [comandaCliente, setComandaCliente] = useState(""); // número digitado (string, pra view)
-    const [comandaAtual, setComandaAtual] = useState<ComandaDados | null>(null); // resultado do "entrar"
+    const [comandaCliente, setComandaCliente] = useState("");
+    const [comandaAtual, setComandaAtual] = useState<ComandaDados | null>(null);
     const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
     const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null);
     const [carrinhoMobileAberto, setCarrinhoMobileAberto] = useState(false);
 
-    // ───────────────────────── Estado de UI dos pedidos (admin) ─────────────────────────
     // O back não guarda "expandido" — isso é só visual, então continua local aqui,
     // independente do polling do usePedidoNovidades.
     const [expandidos, setExpandidos] = useState<Record<string, boolean>>({});
 
-    // ───────────────────────── Estado do formulário de produto (admin) ─────────────────────────
     const [formularioProduto, setFormularioProduto] = useState({
         nome: "",
         preco: "",
@@ -152,14 +122,12 @@ export default function App() {
     });
     const [idEmEdicao, setIdEmEdicao] = useState<string | null>(null);
 
-    // ───────────────────────── Estado da busca de comanda (admin) ─────────────────────────
     const [comandaPesquisada, setComandaPesquisada] = useState("");
     const [comandaVisualizada, setComandaVisualizada] = useState<string | null>(null);
     const [comandaVisualizadaId, setComandaVisualizadaId] = useState<number | null>(null);
 
     const historicoComandaVisualizadaApi = usePedidoHistorico(comandaVisualizadaId);
 
-    // ───────────────────────── Listas adaptadas pra view ─────────────────────────
     const produtosCliente = useMemo(
         () => produtoAtivosApi.produtos.map(produtoDadosParaProduto),
         [produtoAtivosApi.produtos]
@@ -190,11 +158,6 @@ export default function App() {
         return mapa;
     }, [pedidoAbertosApi.pedidos]);
 
-    // "Comandas abertas" (chips) — todas as comandas com pelo menos um pedido
-    // ainda não pago. Importante: isso usa pago = false (pedidoAbertosApi), não
-    // visualizado = false (pedidoNovidadesApi) — senão uma comanda some da lista
-    // assim que o atendente marca o último pedido como "entregue", mesmo que ela
-    // continue ocupada e com conta em aberto.
     const comandasAbertasChips: Record<string, ItemPedido[]> = useMemo(() => {
         const agrupado: Record<string, ItemPedido[]> = {};
         for (const p of pedidoAbertosApi.pedidos) {
@@ -205,8 +168,6 @@ export default function App() {
         return agrupado;
     }, [pedidoAbertosApi.pedidos]);
 
-    // Itens da comanda selecionada — vêm do histórico completo (todos os
-    // pedidos daquela comanda, vistos ou não), que é o extrato de verdade.
     const itensComandaVisualizada: ItemPedido[] = useMemo(
         () => historicoComandaVisualizadaApi.pedidos.flatMap((p) => p.itensPedido.map(itemPedidoDadosParaItemPedido)),
         [historicoComandaVisualizadaApi.pedidos]
@@ -217,16 +178,6 @@ export default function App() {
         return { ...comandasAbertasChips, [comandaVisualizada]: itensComandaVisualizada };
     }, [comandasAbertasChips, comandaVisualizada, itensComandaVisualizada]);
 
-    // Histórico geral (aba "Histórico" do admin) — agora vem de verdade do back,
-    // via GET /pedido/historico (só pedidos com pago = true).
-    //
-    // "Remover" um item do histórico não tem mais um equivalente real no back:
-    // apagar significaria destruir o registro de um pagamento que já aconteceu.
-    // Por isso virou só uma ocultação local (não chama nenhuma API) — se quiser
-    // trocar isso por tirar o botão da tela, é só remover o onRemoverEntrada
-    // do AdminHistoricoTab logo abaixo.
-    // Persistido no localStorage: sem isso, um F5 voltaria a mostrar tudo que
-    // já tinha sido "removido"/"limpo" da tela, porque era só estado em memória.
     const CHAVE_HISTORICO_OCULTOS = "menustream:historico-ocultos";
     const [historicoOcultos, setHistoricoOcultos] = useState<Set<string>>(() => {
         try {
@@ -242,7 +193,7 @@ export default function App() {
             try {
                 localStorage.setItem(CHAVE_HISTORICO_OCULTOS, JSON.stringify([...novo]));
             } catch {
-                // localStorage indisponível (modo privado, quota cheia, etc.) — segue só em memória
+
             }
             return novo;
         });
@@ -258,8 +209,6 @@ export default function App() {
         atualizarHistoricoOcultos((prev) => new Set(prev).add(id));
     }
 
-    // Limpa a lista inteira da tela de uma vez (mesmo mecanismo do removerHistorico,
-    // só que pra todos os itens visíveis no momento) — não apaga nada do banco.
     function limparHistorico() {
         atualizarHistoricoOcultos((prev) => {
             const novo = new Set(prev);
@@ -270,7 +219,6 @@ export default function App() {
         });
     }
 
-    /* ── Carrinho ─────────────────────────────────────────────────────── */
     function adicionarAoCarrinho(produto: Produto) {
         setCarrinho((prev) => {
             const existente = prev.find((i) => i.produto.id === produto.id);
@@ -293,7 +241,6 @@ export default function App() {
         setCarrinho((prev) => prev.filter((i) => i.produto.id !== produtoId));
     }
 
-    /* ── Entrada na comanda (cliente) — POST /comanda/entrar ────────────── */
     async function confirmarEntradaComanda() {
         const numero = parseInt(comandaCliente, 10);
         if (Number.isNaN(numero)) return;
@@ -301,17 +248,12 @@ export default function App() {
         if (resultado) {
             setComandaAtual(resultado);
             setEtapaCliente("menu");
-            // Bug 1: sem isso, o cardápio ficava "congelado" com os produtos
-            // carregados no mount do App (lá na tela de login) pelo resto da
-            // sessão — só um F5 real buscava de novo. Recarregando aqui, toda
-            // entrada na comanda garante que a lista reflete o estado atual.
             produtoAtivosApi.recarregar();
         } else {
             window.alert(erroEntrarComanda ?? "Comanda inválida ou já em uso.");
         }
     }
 
-    /* ── Finalização de pedido (cliente) — POST /pedido ──────────────────── */
     async function finalizarPedido() {
         if (!carrinho.length || !comandaAtual) return;
         const itensPedido: ItemPedidoRequest[] = carrinho.map((i) => ({
@@ -328,7 +270,6 @@ export default function App() {
         }
     }
 
-    /* ── Fechamento de comanda (admin) — POST /comanda/{numero}/fechar ──── */
     async function finalizarPagamento(numero: string) {
         const resultado = await fecharComanda(Number(numero));
         if (resultado) {
@@ -347,7 +288,6 @@ export default function App() {
         setExpandidos((prev) => ({ ...prev, [id]: !prev[id] }));
     }
 
-    /* Vira PATCH /pedido/{id}/visualizar */
     async function entregarPedido(id: string) {
         const ok = await marcarComoVisualizado(Number(id));
         if (ok) pedidoNovidadesApi.recarregar();
@@ -382,10 +322,6 @@ export default function App() {
         }
     }
 
-    /* ── CRUD de produtos (admin) ────────────────────────────────────────
-     * salvarProduto chama POST /produto (criar) ou PUT /produto/{id}
-     * (editar, quando idEmEdicao estiver preenchido).
-     */
     async function salvarProduto() {
         if (!formularioProduto.nome || !formularioProduto.preco || !formularioProduto.descricao.trim()) return;
         const preco = parseFloat(formularioProduto.preco);
@@ -446,7 +382,6 @@ export default function App() {
         });
     }
 
-    /* Vira DELETE /produto/{id} — remoção lógica (disponibilidade = false) */
     async function excluirProduto(produtoId: string) {
         const ok = await desativarProduto(Number(produtoId));
         if (ok) {
@@ -456,7 +391,6 @@ export default function App() {
         }
     }
 
-    /* Reverte a remoção lógica — PUT /produto/{id} com disponibilidade: true */
     async function reativarProduto(produtoId: string) {
         const atualizado = await editarProdutoApi(Number(produtoId), { disponibilidade: true });
         if (atualizado) {
@@ -475,7 +409,6 @@ export default function App() {
         ? produtosCliente.filter((p) => p.categoria === categoriaSelecionada)
         : produtosCliente;
 
-    /* ── Navegação ────────────────────────────────────────────────────── */
     function irParaLogin() {
         setTela("login");
         setEtapaCliente("entrada");
@@ -498,9 +431,6 @@ export default function App() {
         setComandaAtual(null);
     }
 
-    /* ═══════════════════════════════════════════════════════════════
-       LOGIN
-    ═══════════════════════════════════════════════════════════════ */
     if (tela === "login") {
         return (
             <LoginView
@@ -513,9 +443,6 @@ export default function App() {
         );
     }
 
-    /* ═══════════════════════════════════════════════════════════════
-       ADMIN
-    ═══════════════════════════════════════════════════════════════ */
     if (tela === "admin") {
         return (
             <AdminLayout
@@ -569,9 +496,6 @@ export default function App() {
         );
     }
 
-    /* ═══════════════════════════════════════════════════════════════
-       CLIENTE
-    ═══════════════════════════════════════════════════════════════ */
     if (etapaCliente === "sucesso") {
         return (
             <ClienteSucessoStep
@@ -596,7 +520,6 @@ export default function App() {
         );
     }
 
-    // etapaCliente === "menu"
     return (
         <ClienteMenuStep
             numeroComanda={comandaCliente}

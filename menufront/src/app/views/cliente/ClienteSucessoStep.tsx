@@ -6,13 +6,7 @@ interface ClienteSucessoStepProps {
     onEncerrarSessao: () => void;
 }
 
-/*
- * Extraído do App.tsx original (etapa "success" do clientStep).
- * Aparece logo depois que o cliente clica em "Finalizar Pedido" e o
- * POST /pedido dá certo. É a tela mais simples de todas — só confirma
- * visualmente que o pedido chegou, sem buscar nem guardar nenhum dado
- * por conta própria.
- */
+
 export default function ClienteSucessoStep({
                                                numeroComanda,
                                                onFazerOutroPedido,

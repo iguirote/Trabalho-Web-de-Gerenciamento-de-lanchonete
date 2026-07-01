@@ -3,25 +3,16 @@ import type { PedidoDados } from "../interface/PedidoDados";
 
 const API_URL = "http://localhost:8080/pedido";
 
-// Espelha o ItemPedidoDTORequest (item dentro do PedidoDTORequest).
 export interface ItemPedidoRequest {
     produtoId: number;
     quantidade: number;
 }
 
-// Espelha o PedidoDTORequest do back.
 export interface PedidoRequest {
     comandaNumero: number;
     itensPedido: ItemPedidoRequest[];
 }
 
-/*
- * POST /pedido — usado na ClienteMenuStep, no botão "Finalizar Pedido".
- * O carrinho do cliente vira "itensPedido" aqui. Em caso de sucesso, a
- * tela avança pra ClienteSucessoStep; o pedido criado já chega marcado
- * como "visualizado: false", então aparece automaticamente no painel
- * de novidades do atendente no próximo polling.
- */
 export function usePedidoCriar() {
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState<string | null>(null);

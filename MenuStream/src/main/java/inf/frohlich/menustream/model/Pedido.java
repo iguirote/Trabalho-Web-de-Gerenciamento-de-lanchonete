@@ -13,7 +13,6 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Cada pedido pertence a uma Comanda. Representa uma "rodada" de itens
     @ManyToOne
     @JoinColumn(name = "comanda_id", nullable = false)
     private Comanda comanda;
@@ -24,18 +23,13 @@ public class Pedido {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valorTotal;
 
-    // Removido: StatusPedido. Não há necessidade de controlar preparo/entrega
-    // neste modelo — o pedido existe e foi enviado, é só isso que importa.
 
     @Column(nullable = false)
     private LocalDateTime dataPedido;
 
-    // Marca se o atendente já visualizou este pedido (usado para indicar "novidade" na tela).
     @Column(nullable = false)
     private boolean visualizado = false;
 
-    // Marca se este pedido já foi pago (comanda fechada). Pedidos pagos não são mais
-    // apagados do banco — passam a alimentar o histórico geral (ver ComandaService.fecharComanda).
     @Column(nullable = false)
     private boolean pago = false;
 

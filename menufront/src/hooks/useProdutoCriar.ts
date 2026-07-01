@@ -3,7 +3,6 @@ import type { ProdutoDados } from "../interface/ProdutoDados";
 
 const API_URL = "http://localhost:8080/produto";
 
-// Formato esperado pelo back-end no POST /produto (ProdutoDTORequest).
 export interface ProdutoRequest {
     nome: string;
     descricao: string;

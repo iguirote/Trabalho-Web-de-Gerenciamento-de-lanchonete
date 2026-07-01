@@ -11,20 +11,13 @@ public class Comanda {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Número físico da comanda, de 1 a 100. É isso que o cliente digita.
     @Column(nullable = false, unique = true)
     private Integer numero;
 
-    // Indica se a comanda está em uso. Ajuda a evitar dois clientes usando a mesma comanda ao mesmo tempo.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private StatusComanda status;
 
-    // Uma comanda pode ter vários pedidos ao longo do atendimento (1 pedido por "rodada" de itens).
-    // orphanRemoval removido de propósito: ao fechar a comanda os pedidos não são mais
-    // apagados, só marcados como pago = true (ver ComandaService.fecharComanda). Se
-    // mantivéssemos orphanRemoval, qualquer comanda.getPedidos().clear() voltaria a
-    // deletar os pedidos do banco e destruiria o histórico.
     @OneToMany(mappedBy = "comanda", cascade = CascadeType.ALL)
     private List<Pedido> pedidos = new ArrayList<>();
 

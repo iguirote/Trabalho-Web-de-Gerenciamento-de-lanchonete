@@ -26,7 +26,6 @@ public class ComandaService {
         this.pedidoRepository = pedidoRepository;
     }
 
-    /* Cliente digita o número (1-100) para entrar na comanda */
     public ComandaDTOResponse entrar(Integer numero) {
         validarNumero(numero);
 
@@ -38,7 +37,6 @@ public class ComandaService {
         return ComandaMapper.toResponse(salva);
     }
 
-    /* Usado quando a comanda é fechada/paga e volta a ficar disponível */
     public ComandaDTOResponse liberar(Integer numero) {
         validarNumero(numero);
 
@@ -50,40 +48,30 @@ public class ComandaService {
         return ComandaMapper.toResponse(salva);
     }
 
-    /* Retorna todos os pedidos da comanda e depois libera ela — usado para gerar extrato/NFe antes de liberar */
     public Map<String, Object> fecharComanda(Integer numero) {
         validarNumero(numero);
 
         Comanda comanda = comandaRepository.findByNumero(numero)
                 .orElseThrow(() -> new IllegalArgumentException("Comanda não encontrada."));
 
-        /* Pedidos da rodada atual — só os que ainda não foram pagos. Comandas
-         * reaproveitadas podem ter pedidos antigos (de clientes anteriores) já
-         * marcados como pago = true, esses não entram no fechamento de novo. */
         List<Pedido> pedidos = comanda.getPedidos().stream()
                 .filter(p -> !p.isPago())
                 .toList();
 
-        /* Calcula total geral */
         BigDecimal totalGeral = pedidos.stream()
                 .map(Pedido::getValorTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        /* Mapeia os pedidos para response (com todos os dados) */
         List<PedidoDTOResponse> pedidosDTO = PedidoMapper.toResponseList(pedidos);
 
-        /* Marca os pedidos da rodada como pagos — não deleta mais nada do banco,
-         * eles continuam existindo para alimentar o histórico geral. */
         for (Pedido pedido : pedidos) {
             pedido.setPago(true);
         }
         pedidoRepository.saveAll(pedidos);
 
-        /* Marca como LIVRE para próximo cliente */
         comanda.setStatus(StatusComanda.LIVRE);
         comandaRepository.save(comanda);
 
-        /* Retorna dados para o front gerar extrato/impressão */
         return Map.of(
                 "numero", numero,
                 "totalGeral", totalGeral,

@@ -8,8 +8,6 @@ interface LoginViewProps {
     onSelecionarCliente: () => void;
 }
 
-// Extraído do App.tsx original. A lógica de navegação (trocar de tela) continua
-// vindo de fora via props — esta tela só cuida da própria aparência.
 export default function LoginView({
                                       quantidadeProdutos,
                                       quantidadePedidosPendentes,

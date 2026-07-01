@@ -31,7 +31,6 @@ public class PedidoService {
         this.produtoRepository = produtoRepository;
     }
 
-    /* Cria um novo pedido (uma "rodada" de itens) vinculado a uma comanda existente */
     public PedidoDTOResponse salvar(PedidoDTORequest dto) {
         validar(dto);
 
@@ -61,7 +60,6 @@ public class PedidoService {
         return PedidoMapper.toResponse(pedidoRepository.save(pedido));
     }
 
-    /* Atualiza um pedido existente (trocar itens, quantidades) */
     public PedidoDTOResponse atualizar(Long id, UpdatePedidoDTO dto) {
         validar(dto);
 
@@ -73,7 +71,6 @@ public class PedidoService {
 
         pedido.setComanda(comanda);
 
-        /* Limpa itens antigos — orphanRemoval cuida da exclusão no banco */
         pedido.getItensPedido().clear();
 
         BigDecimal subtotal = BigDecimal.ZERO;
@@ -86,7 +83,6 @@ public class PedidoService {
             subtotal = subtotal.add(produto.getPreco().multiply(BigDecimal.valueOf(itemDTO.quantidade())));
         }
 
-        /* Recalcula o valor total */
         pedido.setValorTotal(subtotal.setScale(2, RoundingMode.HALF_UP));
 
         return PedidoMapper.toResponse(pedidoRepository.save(pedido));
@@ -102,36 +98,26 @@ public class PedidoService {
                 .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));
     }
 
-    /* Histórico de pedidos EM ABERTO de uma comanda, em ordem cronológica (extrato pro atendente).
-     * Filtra pago = false: numa comanda reaproveitada, os pedidos da rodada anterior já
-     * pagos não devem aparecer aqui de novo. */
     public List<PedidoDTOResponse> listarPorComanda(Long comandaId) {
         return PedidoMapper.toResponseList(pedidoRepository.findByComandaIdAndPagoFalseOrderByDataPedidoAsc(comandaId));
     }
 
-    /* Histórico geral do sistema: todos os pedidos já pagos, do mais recente pro mais antigo */
     public List<PedidoDTOResponse> listarHistorico() {
         return PedidoMapper.toResponseList(pedidoRepository.findByPagoTrueOrderByDataPedidoDesc());
     }
 
-    /* Todos os pedidos em aberto (pago = false) do sistema, de qualquer comanda — usado
-     * pra montar os "chips" de comandas abertas na aba Comandas do admin. Não usa
-     * visualizado, porque um pedido pode já ter sido visto e ainda não ter sido pago. */
     public List<PedidoDTOResponse> listarAbertos() {
         return PedidoMapper.toResponseList(pedidoRepository.findByPagoFalseOrderByDataPedidoAsc());
     }
 
-    /* Apenas os pedidos ainda não vistos de uma comanda específica */
     public List<PedidoDTOResponse> listarNovidades(Long comandaId) {
         return PedidoMapper.toResponseList(pedidoRepository.findByComandaIdAndVisualizadoFalse(comandaId));
     }
 
-    /* Todas as novidades do sistema, de qualquer comanda — usado pelo painel central do atendente */
     public List<PedidoDTOResponse> listarTodasNovidades() {
         return PedidoMapper.toResponseList(pedidoRepository.findByVisualizadoFalseOrderByDataPedidoAsc());
     }
 
-    /* Chamado quando o atendente abre/vê o pedido — marca como visualizado */
     public void marcarComoVisualizado(Long id) {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido não encontrado."));

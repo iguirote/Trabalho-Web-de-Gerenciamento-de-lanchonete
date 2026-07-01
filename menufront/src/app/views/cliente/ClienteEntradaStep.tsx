@@ -7,18 +7,7 @@ interface ClienteEntradaStepProps {
     onVoltar: () => void;
 }
 
-/*
- * Extraído do App.tsx original (etapa "entrada" do clientStep).
- * Esta tela só cuida da aparência e captura o que o cliente digita.
- * O número digitado fica guardado fora daqui (no componente pai),
- * porque depois — na etapa de integração com a API — vamos precisar
- * desse valor para chamar POST /comanda/entrar e validar se o número
- * é válido (1 a 100) e se a comanda existe.
- *
- * Por isso o "value" e o "onChange" do campo de número vêm de fora,
- * via props, em vez de um useState aqui dentro: assim o componente
- * pai consegue interceptar e validar antes de avançar de tela.
- */
+
 export default function ClienteEntradaStep({
                                                numeroComanda,
                                                onChangeNumeroComanda,

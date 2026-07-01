@@ -3,11 +3,7 @@ import type { ProdutoDados } from "../interface/ProdutoDados";
 
 const API_URL = "http://localhost:8080/produto";
 
-/*
- * GET /produto/ativos — usado no cardápio do cliente (ClienteMenuStep).
- * Só traz produtos com disponibilidade = true, porque o cliente não
- * deve ver itens que o admin desativou.
- */
+
 export function useProdutoAtivos() {
     const [produtos, setProdutos] = useState<ProdutoDados[]>([]);
     const [carregando, setCarregando] = useState(true);

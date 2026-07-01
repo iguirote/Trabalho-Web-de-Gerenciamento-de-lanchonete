@@ -13,11 +13,9 @@ public class PedidoMapper {
     public static PedidoDTOResponse toResponse(Pedido pedido) {
         if (pedido == null) return null;
 
-        /* Mapeia a comanda */
         var comandaDTO = pedido.getComanda() != null ?
                 ComandaMapper.toResponse(pedido.getComanda()) : null;
 
-        /* Mapeia cada item do pedido */
         List<ItemPedidoDTOResponse> itensDTO = pedido.getItensPedido().stream()
                 .map(ItemPedidoMapper::toResponse)
                 .toList();
